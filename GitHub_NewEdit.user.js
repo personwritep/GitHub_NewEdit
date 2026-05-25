@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        GitHub NewEdit 🔵
 // @namespace        http://tampermonkey.net/
-// @version        0.1
+// @version        0.2
 // @description        連番付きの新規ファイルのファイル編集画面を開く「Shift+左Click」
 // @author        personwritep
 // @match        https://github.com/*
@@ -40,7 +40,7 @@ function main(){
             if(input_name){
                 // JavaScriptのセッターの標準プロパティを取得
                 let valueSetter=
-                      Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+                    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
                 // Reactの内部状態をバイパスして値を強制的に書き込む
                 valueSetter.call(input_name, new_name);
                 //「ユーザーが入力した」というイベントを発生
@@ -63,17 +63,26 @@ function main(){
                     if(svg){ // ファイル名の行の場合
                         let link=tr_s[k].querySelector('.react-directory-row-name-cell-large-screen a');
                         if(link){
-                            let edit_url;
-                            let now_url=location.href.split('?')[0];
-                            if(now_url.includes('/tree/main')){
-                                edit_url=now_url.replace('/tree/main', '/new/main');
-                                edit_url=edit_url + '?' + link.textContent; }
-                            else{
-                                edit_url=now_url + '/new/main?' + link.textContent; }
+                            if(check_js(link)){ //「～.user.js」のファイルは除外
+                                let edit_url;
+                                let now_url=location.href.split('?')[0];
+                                if(now_url.includes('/tree/main')){
+                                    edit_url=now_url.replace('/tree/main', '/new/main');
+                                    edit_url=edit_url + '?' + link.textContent; }
+                                else{
+                                    edit_url=now_url + '/new/main?' + link.textContent; }
 
-                            window.open(edit_url);
-                            }}
+                                window.open(edit_url);
+                            }}}
                 }}); }
+
+
+        function check_js(link){
+            let filename=link.textContent;
+            if(filename.includes('user.js')){
+                return false; }
+            else{
+                return true; }}
 
     } // to_edit()
 
